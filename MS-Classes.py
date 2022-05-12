@@ -1,7 +1,8 @@
 """
 Manager class configuration for importing into other projcets
 """
-
+import csv
+import SQLAlchemy as sql
 from importlib import import_module
 
 class Manager:
@@ -33,6 +34,7 @@ class Manager:
 
 
 class Agent:
+    """Base class for all internal operators."""
     agentCount = 0
 
     def __new__(self):
@@ -45,6 +47,7 @@ class Agent:
 
 
 class Handler:
+    """Base class for all external operators."""
     handlerCount = 0
 
     def __new__(self):
@@ -77,6 +80,8 @@ class PathAgent(Agent):
             print(self.pathDict[label])
 
 class ImportHandler(Handler):
+    """Debugging and error checking handler related to library imports."""
+
     def __init__(self,modulePath):
         self.ModuleList = []
         self.AddIOPath("Modules",modulePath)
@@ -89,14 +94,63 @@ class ImportHandler(Handler):
             if module not in sys.modules:
                 import_module(module)
 
-
+    def PrintImportedModules(self):
+        print(self.ModuleList)
 
 class CSVHandler(Handler):
+    """Data handler for CSV data."""
+    def __init__(self):
+        self.delimiter = ","
+        self.rawLines = []
+        self.cleanLines = []
+        self.splitLines = []
+
+    def ReadCSV(self,csvPath):
+        """Reads CSV data into a list on a line-by-line basis"""
+        with open(csvPath) as rFile:
+            csvReader = csv.reader(csv_file, delimiter = self.delimiter)
+            self.rawLines = csvReader.readlines()
+
+    def CleanCSV(self):
+        """Strips blank space from the end of CSV lines."""
+        for line in self.rawLines:
+            line.rstrip()
+            if len(line) != 0:
+                self.cleanLines.append(line)
+
+    def SplitCSV(self):
+        """Splits the CSV data based on pre-set delimiters."""
+        for line in self.cleanLines:
+            splitLines = line.split(self.delimiter)
+            self.splitLines.append(splitLines)
+
+    def ProcessCSV(self,csvPath):
+        """Full method for processing CSV files into lists."""
+        try:
+            self.ReadCSV(csvPath)
+            print("Successfully read CSV.")
+            self.CleanCSV()
+            print("Successfully cleaned CSV.")
+            self.SplitCSV()
+            print("Successfully split CSV.")
+        except:
+            print("Failed to complete import process.")
+
+class SQLHandler(Handler):
+    #TODO: Write SQL handler methods
     def __init__(self):
         pass
 
-class SQLHandler(Handler):
-    def __init__(self):
+    def Select(self):
+        pass
+
+    def Insert(self):
+        pass
+
+    def Update(self):
+        pass
+
+    def Delete(self):
         pass
 
 
